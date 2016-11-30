@@ -5,7 +5,8 @@ require "pry-byebug"
 #### TODO Figure out how to silence the rubygems (Or prevent it from
 # bundling at all) The solution below only silence the generating
 # files part
-# # Borrowed from https://gist.github.com/adamstegman/926858
+#
+# Borrowed from https://gist.github.com/adamstegman/926858
 #
 # RSpec.configure do |config|
 #   config.before(:all) { silence_output }
