@@ -15,7 +15,7 @@ module Frankly
     argument :name, :type => :string, :desc => "The name of the new application"
 
     def setup
-      @app_path = name.downcase.gsub(/[^a-z|\-|\_]/, '')
+      @app_path = name.downcase.gsub(/[^a-z0-9~\-|\_]/, '')
     end
 
     def create_app_scaffold
