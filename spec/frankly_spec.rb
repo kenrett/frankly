@@ -19,12 +19,11 @@ describe Frankly do
     end
 
     it "builds a new app" do
-      app_directory = 'test_app2-with-NumS'
-      Frankly::CLI.start [app_directory]
+      Frankly::CLI.start ["test_app"]
 
-      expect(File.directory?(app_directory)).to be true
+      expect(File.directory?('test_app')).to be true
 
-      Dir.chdir app_directory do
+      Dir.chdir 'test_app' do
         expect(File.exist?('config.ru')).to be true
         expect(File.exist?('Gemfile')).to be true
         expect(File.exist?('Rakefile')).to be true
@@ -34,6 +33,18 @@ describe Frankly do
         expect(File.directory?('db')).to be true
         expect(File.directory?('public')).to be true
       end
+    end
+
+    it "builds an app in a directory with alphanumeric characters" do
+      Frankly::CLI.start ["test_app2-with-NumS"]
+      
+      expect(File.directory?('test_app2-with-NumS')).to be true
+    end
+
+    after(:all) do
+      Dir.chdir('..')
+      FileUtils.rm_rf @tmp_dir
+      expect(File.directory?(@tmp_dir)).to be false
     end
   end
 end
