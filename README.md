@@ -11,9 +11,13 @@ Type this into the command line:
 gem install frankly
 ```
 
+## Dependency
+
+Frankly is dependent on using postgres as your database. If you don't have it installed, please check out this great blogpost for [OSX](https://launchschool.com/blog/how-to-install-postgresql-on-a-mac) or [Linux](https://launchschool.com/blog/how-to-install-postgres-for-linux) from [LaunchSchool](https://launchschool.com/) on how to get set up!
+
 ## Usage
 
-Simple type `frankly APP_NAME` and frankly will create a sinatra scaffold, git init, and bundle.
+Simple type `frankly APP_NAME` and frankly will create a sinatra scaffold, git init, and bundle your application. Currently frankly does not support special characters or numbers in an `APP_NAME` but please feel free to make a Pull Request if you would like to contribute!
 
 ## Development
 
