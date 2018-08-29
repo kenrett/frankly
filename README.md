@@ -1,7 +1,7 @@
 # Frankly
 ![Build Status](https://travis-ci.org/kenrett/frankly.svg?branch=master)
 
-An opinionated sinatra skeleton with Rake tasks, rspec, postgres, and more!
+An opinionated sinatra app skeleton generator with Rake tasks, rspec, postgres, pry and more!
 
 ## Installation
 
