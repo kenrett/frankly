@@ -25,6 +25,7 @@ module Frankly
 
     def setup
       @app_path = sanitized_app_path
+      @db_name = @app_path.tr("-", "_")
     end
 
     def create_app_scaffold
@@ -35,6 +36,7 @@ module Frankly
       empty_directory "#{@app_path}/app/helpers"
       empty_directory "#{@app_path}/app/models"
       empty_directory "#{@app_path}/db/migrate"
+      empty_directory "#{@app_path}/spec/requests"
       create_file "#{@app_path}/app/controllers/.gitkeep"
       create_file "#{@app_path}/app/helpers/.gitkeep"
       create_file "#{@app_path}/app/models/.gitkeep"
@@ -50,9 +52,12 @@ module Frankly
       copy_file "config/database.rb", "#{@app_path}/config/database.rb"
       copy_file "config/environment.rb", "#{@app_path}/config/environment.rb"
       copy_file "db/seeds.rb", "#{@app_path}/db/seeds.rb"
-      copy_file "README.md", "#{@app_path}/README.md"
+      template "README.md.tt", "#{@app_path}/README.md"
       template "Gemfile.tt", "#{@app_path}/Gemfile"
       template "gitignore.tt", "#{@app_path}/.gitignore"
+      copy_file ".rspec", "#{@app_path}/.rspec"
+      copy_file "spec/spec_helper.rb", "#{@app_path}/spec/spec_helper.rb"
+      copy_file "spec/requests/app_spec.rb", "#{@app_path}/spec/requests/app_spec.rb"
       copy_file "public/css/application.css", "#{@app_path}/public/css/application.css"
       copy_file "public/js/application.js", "#{@app_path}/public/js/application.js"
       copy_file "public/favicon.ico", "#{@app_path}/public/favicon.ico"
@@ -70,13 +75,25 @@ module Frankly
       inside(@app_path) { run("bundle install") }
     end
 
+    def print_next_steps
+      say "\nNext steps:"
+      say "  cd #{@app_path}"
+      say "  bundle install#{options[:bundle] ? ' (already run because you passed --bundle)' : ''}"
+      say "  bundle exec rackup"
+      say "  Set DATABASE_URL in your environment (or use the defaults in config/database.rb)."
+      say "  Database setup is required for persistence (create DB and run migrations)."
+    end
+
     private
 
     def sanitized_app_path
-      cleaned = name.to_s.strip.downcase.gsub(/[^a-z0-9_-]/, "")
-      raise Thor::Error, "APP_NAME must include at least one letter or number" if cleaned.empty?
+      raw_name = name.to_s.strip
+      raise Thor::Error, "APP_NAME cannot be blank" if raw_name.empty?
+      unless raw_name.match?(/\A[a-zA-Z0-9][a-zA-Z0-9_-]*\z/)
+        raise Thor::Error, "APP_NAME may only include letters, numbers, hyphens, and underscores"
+      end
 
-      cleaned
+      raw_name.downcase
     end
   end
 end

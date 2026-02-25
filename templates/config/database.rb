@@ -7,7 +7,7 @@ rack_env = ENV.fetch("RACK_ENV", "development")
 ActiveRecord::Base.logger = Logger.new($stdout) if rack_env == "development"
 
 build_db_config = lambda do |env_name|
-  database_url = ENV.fetch("DATABASE_URL", "postgres://localhost/#{APP_NAME}_#{env_name}")
+  database_url = ENV.fetch("DATABASE_URL", "postgres://localhost/#{DB_NAME}_#{env_name}")
   uri = URI.parse(database_url)
   database_name = uri.path.sub(%r{^/}, "")
   adapter = uri.scheme == "postgres" ? "postgresql" : uri.scheme

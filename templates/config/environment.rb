@@ -11,6 +11,7 @@ require "sinatra/reloader"
 
 APP_ROOT = Pathname.new(File.expand_path("..", __dir__))
 APP_NAME = APP_ROOT.basename.to_s
+DB_NAME = APP_NAME.tr("-", "_")
 
 Dir[APP_ROOT.join("app", "helpers", "*.rb")].sort.each { |file| require file }
 Dir[APP_ROOT.join("app", "controllers", "*.rb")].sort.each { |file| require file }
