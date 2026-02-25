@@ -3,6 +3,7 @@
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "frankly/version"
+require "frankly/banner"
 
 Gem::Specification.new do |spec|
   spec.name = "frankly"
@@ -15,20 +16,8 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/kenrett/frankly"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1"
-  spec.post_install_message = <<-PIC
-              .
-  .---------.'---.
-  '.       :    .'
-    '.  .:::  .' The Chairman
-      '.'::'.'    of the Board
-        '||'       has arrived.
-         ||
-         ||
-         ||
-     ---====---
-       PIC
+  spec.post_install_message = Frankly::Banner::ASCII_ART
 
-  spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
 
   spec.files = `git ls-files -z`.split("\x0").reject { |f| f.start_with?("spec/") }

@@ -16,6 +16,21 @@ It creates a PostgreSQL + ActiveRecord app scaffold with a modern Sinatra setup.
 gem install frankly
 ```
 
+Install and runtime banner:
+
+```text
+              .
+  .---------.'---.
+  '.       :    .'
+    '.  .:::  .' The Chairman
+      '.'::'.'    of the Board
+        '||'       has arrived.
+         ||
+         ||
+         ||
+     ---====---
+```
+
 ## Usage
 
 Generate a new app:

@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
-require 'rubygems'
-require 'bundler/setup'
-require 'frankly'
+require "rubygems"
+require "bundler/setup"
+require "frankly"
 
 begin
-  require 'frankly/cli'
+  puts Frankly::Banner::ASCII_ART
+  require "frankly/cli"
   Frankly::CLI.start
 rescue Interrupt => e
   puts "\nQuitting..."
