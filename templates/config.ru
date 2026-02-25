@@ -1,6 +1,5 @@
-# Require config/environment.rb
-require ::File.expand_path('../config/environment',  __FILE__)
+# frozen_string_literal: true
 
-set :app_file, __FILE__
+require_relative "app"
 
-run Sinatra::Application
+run App

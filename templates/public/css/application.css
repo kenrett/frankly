@@ -1,0 +1,26 @@
+:root {
+  font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #1f2937;
+  background: radial-gradient(circle at top, #f8fafc, #eef2ff 50%, #e5e7eb 100%);
+}
+
+.container {
+  max-width: 44rem;
+  margin: 3rem auto;
+  padding: 2.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+h1 {
+  margin-top: 0;
+}
