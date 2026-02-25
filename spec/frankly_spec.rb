@@ -27,6 +27,8 @@ RSpec.describe Frankly::CLI do
       expect(File.exist?("test_app/Gemfile")).to be(true)
       expect(File.exist?("test_app/config.ru")).to be(true)
       expect(File.exist?("test_app/app.rb")).to be(true)
+      expect(File.exist?("test_app/bin/console")).to be(true)
+      expect(File.executable?("test_app/bin/console")).to be(true)
       expect(File.exist?("test_app/config/database.rb")).to be(true)
       expect(File.exist?("test_app/README.md")).to be(true)
       expect(File.exist?("test_app/.rspec")).to be(true)

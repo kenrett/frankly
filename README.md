@@ -63,6 +63,7 @@ my_app/
 cd my_app
 bundle install
 bundle exec rackup
+bundle exec bin/console
 ```
 
 Open [http://localhost:9292](http://localhost:9292).

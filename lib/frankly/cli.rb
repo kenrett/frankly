@@ -52,6 +52,7 @@ module Frankly
       copy_file "config/database.rb", "#{@app_path}/config/database.rb"
       copy_file "config/environment.rb", "#{@app_path}/config/environment.rb"
       copy_file "db/seeds.rb", "#{@app_path}/db/seeds.rb"
+      copy_file "bin/console", "#{@app_path}/bin/console"
       template "README.md.tt", "#{@app_path}/README.md"
       template "Gemfile.tt", "#{@app_path}/Gemfile"
       template "gitignore.tt", "#{@app_path}/.gitignore"
@@ -61,6 +62,7 @@ module Frankly
       copy_file "public/css/application.css", "#{@app_path}/public/css/application.css"
       copy_file "public/js/application.js", "#{@app_path}/public/js/application.js"
       copy_file "public/favicon.ico", "#{@app_path}/public/favicon.ico"
+      chmod "#{@app_path}/bin/console", 0o755
     end
 
     def initialize_git_repo
@@ -80,6 +82,7 @@ module Frankly
       say "  cd #{@app_path}"
       say "  bundle install#{options[:bundle] ? ' (already run because you passed --bundle)' : ''}"
       say "  bundle exec rackup"
+      say "  bundle exec bin/console"
       say "  Set DATABASE_URL in your environment (or use the defaults in config/database.rb)."
       say "  Database setup is required for persistence (create DB and run migrations)."
     end
