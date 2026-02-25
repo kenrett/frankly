@@ -1,5 +1,51 @@
 # frozen_string_literal: true
 
+require "bundler/setup"
+require "fileutils"
+require "active_support/inflector"
+
+unless defined?(Rails)
+  module Rails
+    class AppConfig
+      def load_database_yaml
+        {}
+      end
+
+      def paths
+        { "db" => ["db"] }
+      end
+    end
+
+    class AppShim
+      def config
+        @config ||= AppConfig.new
+      end
+
+      def paths
+        { "db/migrate" => ["db/migrate"] }
+      end
+
+      def migration_railties
+        []
+      end
+    end
+
+    module_function
+
+    def env
+      ENV.fetch("RACK_ENV", "development")
+    end
+
+    def application
+      @application ||= AppShim.new
+    end
+
+    def root
+      Dir.pwd
+    end
+  end
+end
+
 require "sinatra/activerecord/rake"
 require_relative "app"
 
@@ -10,3 +56,135 @@ rescue LoadError
 end
 
 task default: :spec
+
+if ARGV.first.to_s.start_with?("generate:")
+  ARGV[1..].to_a.each do |arg|
+    task(arg.to_sym) unless Rake::Task.task_defined?(arg)
+  end
+end
+
+def positional_arg_for(task_name, index = 0)
+  tasks = Rake.application.top_level_tasks
+  position = tasks.index(task_name)
+  return nil unless position
+
+  tasks[position + 1 + index]
+end
+
+def positional_args_for(task_name, from_index: 0)
+  tasks = Rake.application.top_level_tasks
+  position = tasks.index(task_name)
+  return [] unless position
+
+  tasks[(position + 1 + from_index)..].to_a
+end
+
+namespace :generate do
+  desc "Generate a model Usage: rake generate:model User name:string age:integer"
+  task :model, [:name] do |_task, args|
+    model_name = args[:name].presence || positional_arg_for("generate:model")
+    model_name = model_name.to_s.strip
+    abort "Model name is required. Example: rake generate:model User" if model_name.empty?
+
+    class_name = model_name.camelize
+    file_name = model_name.underscore
+    model_path = File.join("app", "models", "#{file_name}.rb")
+
+    if File.exist?(model_path)
+      puts "Model exists: #{model_path}"
+    else
+      FileUtils.mkdir_p(File.dirname(model_path))
+      File.write(model_path, <<~RUBY)
+        # frozen_string_literal: true
+
+        class #{class_name} < ActiveRecord::Base
+        end
+      RUBY
+      puts "Created #{model_path}"
+    end
+
+    attrs = positional_args_for("generate:model", from_index: 1).map(&:strip).reject(&:empty?)
+    next if attrs.empty?
+
+    migration_name = "create_#{class_name.tableize}"
+    migration_class = migration_name.camelize
+    timestamp = Time.now.utc.strftime("%Y%m%d%H%M%S")
+    migration_path = File.join("db", "migrate", "#{timestamp}_#{migration_name}.rb")
+
+    columns = attrs.map do |attr|
+      column_name, column_type = attr.split(":", 2)
+      next if column_name.to_s.strip.empty? || column_type.to_s.strip.empty?
+      "      t.#{column_type} :#{column_name}"
+    end.compact
+
+    migration_version = "#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}"
+    FileUtils.mkdir_p(File.dirname(migration_path))
+    File.write(migration_path, <<~RUBY)
+      class #{migration_class} < ActiveRecord::Migration[#{migration_version}]
+        def change
+          create_table :#{class_name.tableize} do |t|
+      #{columns.join("\n")}
+
+            t.timestamps
+          end
+        end
+      end
+    RUBY
+
+    puts "Created #{migration_path}"
+  end
+
+  desc "Generate a controller + index view Usage: rake generate:controller Users"
+  task :controller, [:name] do |_task, args|
+    controller_name = args[:name].presence || positional_arg_for("generate:controller")
+    controller_name = controller_name.to_s.strip
+    abort "Controller name is required. Example: rake generate:controller Users" if controller_name.empty?
+
+    base_name = controller_name.underscore
+    base_name = base_name.delete_suffix("_controller")
+    plural_name = base_name.pluralize
+
+    controller_path = File.join("app", "controllers", "#{plural_name}_controller.rb")
+    view_dir = File.join("app", "views", plural_name)
+    view_path = File.join(view_dir, "index.erb")
+
+    if File.exist?(controller_path)
+      puts "Controller exists: #{controller_path}"
+    else
+      FileUtils.mkdir_p(File.dirname(controller_path))
+      File.write(controller_path, <<~RUBY)
+        # frozen_string_literal: true
+
+        class App < Sinatra::Base
+          get "/#{plural_name}" do
+            erb :\"#{plural_name}/index\"
+          end
+        end
+      RUBY
+      puts "Created #{controller_path}"
+    end
+
+    if File.exist?(view_path)
+      puts "View exists: #{view_path}"
+    else
+      FileUtils.mkdir_p(view_dir)
+      File.write(view_path, "<h1>#{plural_name.humanize}</h1>\n")
+      puts "Created #{view_path}"
+    end
+  end
+
+  desc "Generate model + controller Usage: rake generate:resource User name:string"
+  task :resource, [:name] do |_task, args|
+    resource_name = args[:name].presence || positional_arg_for("generate:resource")
+    resource_name = resource_name.to_s.strip
+    abort "Resource name is required. Example: rake generate:resource User" if resource_name.empty?
+
+    attrs = positional_args_for("generate:resource", from_index: 1).map(&:strip).reject(&:empty?)
+    original_tasks = Rake.application.top_level_tasks.dup
+    Rake.application.instance_variable_set(:@top_level_tasks, ["generate:model", resource_name, *attrs])
+    Rake::Task["generate:model"].invoke(resource_name)
+    Rake::Task["generate:controller"].invoke(resource_name.pluralize)
+  ensure
+    Rake.application.instance_variable_set(:@top_level_tasks, original_tasks) if defined?(original_tasks)
+  end
+end
